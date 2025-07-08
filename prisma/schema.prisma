@@ -8,6 +8,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Tipos de usuário
+// - PROFESSOR: Pode criar turmas e gerenciar alunos
+// - STUDENT: Pode se inscrever em turmas criadas por professores
 enum Role {
   PROFESSOR
   STUDENT
@@ -18,7 +21,60 @@ model User {
   name       String
   email      String   @unique
   password   String
-  role       Role     @default(STUDENT)
+  role       Role
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+// Relações
+  turmasCreated  Turma[]        @relation("ProfessorTurmas")
+  turmaAluno     TurmaAluno[]
+}
+
+/// Turma criada por um professor
+model Turma {
+  id             Int            @id @default(autoincrement())
+  title          String
+  description    String?
+  token          String         @unique
+  professor      User           @relation("ProfessorTurmas", fields: [professorId], references: [id])
+  professorId    String
+  turmaAluno     TurmaAluno[]
+  decks          Deck[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+/// Associação N:M entre Turma e User (aluno)
+model TurmaAluno {
+  id             Int            @id @default(autoincrement())
+  turma          Turma          @relation(fields: [turmaId], references: [id])
+  turmaId        Int
+  student        User           @relation(fields: [studentId], references: [id])
+  studentId      String
+  joinedAt       DateTime       @default(now())
+
+  @@unique([turmaId, studentId])
+}
+
+/// Conjunto de flashcards dentro de uma turma
+model Deck {
+  id             Int            @id @default(autoincrement())
+  title          String
+  description    String?
+  turma          Turma          @relation(fields: [turmaId], references: [id])
+  turmaId        Int
+  cards          Card[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+/// Carta de um deck de flashcards
+model Card {
+  id             Int            @id @default(autoincrement())
+  front          String
+  back           String
+  imageUrl       String?
+  deck           Deck           @relation(fields: [deckId], references: [id])
+  deckId         Int
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
