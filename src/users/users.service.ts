@@ -8,9 +8,13 @@ export type User = any;
 export class UsersService {
   constructor(private prisma: PrismaService) {}
   async createUser(name: string, email: string, password: string, role: string) {
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: { name, email, password, role: role as Role },
     });
+    return {
+      message: 'Cadastro realizado com sucesso',
+      user,
+    };
   }
 
   async login(email: string, password: string, role: string) {

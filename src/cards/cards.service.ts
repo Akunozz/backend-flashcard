@@ -6,7 +6,7 @@ export class CardsService {
   constructor(private prisma: PrismaService) {}
 
   async createCard(data: { front: string; back: string; deckId: number; imageUrl?: string }) {
-    return this.prisma.card.create({
+    const cards = await this.prisma.card.create({
       data: {
         front: data.front,
         back: data.back,
@@ -14,6 +14,10 @@ export class CardsService {
         deck: { connect: { id: data.deckId } },
       },
     });
+    return {
+      message: 'Card criado com sucesso',
+      cards,
+    };
   }
 
   async findAll() {

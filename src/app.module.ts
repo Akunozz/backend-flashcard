@@ -4,9 +4,11 @@ import { UsersModule } from './users/users.module';
 import { TurmasModule } from './turmas/turmas.module';
 import { DecksModule } from './decks/decks.module';
 import { CardsModule } from './cards/cards.module';
+import { DeckSessionModule } from './deckSession/deckSession.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, TurmasModule, DecksModule, CardsModule],
+  imports: [AuthModule, UsersModule, TurmasModule, DecksModule, CardsModule, DeckSessionModule, ReviewModule],
   controllers: [],
   providers: [],
 })

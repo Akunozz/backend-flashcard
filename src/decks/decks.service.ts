@@ -5,8 +5,19 @@ import { PrismaService } from '../prisma/prisma.service';
 export class DecksService {
   constructor(private prisma: PrismaService) {}
 
-  async createDeck(data: { title: string; description?: string; turmaId: number }) {
+  async createDeck(data: {
+    title: string;
+    description?: string;
+    turmaId: number;
+  }) {
     return this.prisma.deck.create({ data });
+  }
+
+  async findByTurmaId(turmaId: number) {
+    return this.prisma.deck.findMany({
+      where: { turmaId },
+      include: { turma: true, cards: true },
+    });
   }
 
   async findAll() {
@@ -14,7 +25,10 @@ export class DecksService {
   }
 
   async findById(id: number) {
-    return this.prisma.deck.findUnique({ where: { id }, include: { turma: true, cards: true } });
+    return this.prisma.deck.findUnique({
+      where: { id },
+      include: { turma: true, cards: true },
+    });
   }
 
   async updateDeck(id: number, data: { title?: string; description?: string }) {

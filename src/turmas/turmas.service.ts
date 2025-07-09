@@ -32,8 +32,9 @@ export class TurmasService {
       data: { ...data, token },
     });
     return {
-      message: 'Turma criada com sucesso!',
+      message: 'Turma criada com sucesso',
       token: turma.token,
+      turma
     };
   }
 

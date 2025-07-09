@@ -16,65 +16,100 @@ enum Role {
   STUDENT
 }
 
+// Resultado de uma revisão de flashcard
+enum ReviewResult {
+  CORRECT
+  INCORRECT
+}
+
 model User {
-  id         String      @id @default(uuid())
-  name       String
-  email      String   @unique
-  password   String
-  role       Role
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-// Relações
-  turmasCreated  Turma[]        @relation("ProfessorTurmas")
-  turmaAluno     TurmaAluno[]
+  id            String        @id @default(uuid())
+  name          String
+  email         String        @unique
+  password      String
+  role          Role          @default(STUDENT)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  // Relações
+  turmasCreated Turma[]       @relation("ProfessorTurmas")
+  turmaAluno    TurmaAluno[]
+  sessions      DeckSession[]
 }
 
 /// Turma criada por um professor
 model Turma {
-  id             Int            @id @default(autoincrement())
-  title          String
-  description    String?
-  token          String         @unique
-  professor      User           @relation("ProfessorTurmas", fields: [professorId], references: [id])
-  professorId    String
-  turmaAluno     TurmaAluno[]
-  decks          Deck[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String?
+  token       String       @unique
+  professor   User         @relation("ProfessorTurmas", fields: [professorId], references: [id])
+  professorId String
+  turmaAluno  TurmaAluno[]
+  decks       Deck[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 /// Associação N:M entre Turma e User (aluno)
 model TurmaAluno {
-  id             Int            @id @default(autoincrement())
-  turma          Turma          @relation(fields: [turmaId], references: [id])
-  turmaId        Int
-  student        User           @relation(fields: [studentId], references: [id])
-  studentId      String
-  joinedAt       DateTime       @default(now())
+  id        Int      @id @default(autoincrement())
+  turma     Turma    @relation(fields: [turmaId], references: [id])
+  turmaId   Int
+  student   User     @relation(fields: [studentId], references: [id])
+  studentId String
+  joinedAt  DateTime @default(now())
 
   @@unique([turmaId, studentId])
 }
 
 /// Conjunto de flashcards dentro de uma turma
 model Deck {
-  id             Int            @id @default(autoincrement())
-  title          String
-  description    String?
-  turma          Turma          @relation(fields: [turmaId], references: [id])
-  turmaId        Int
-  cards          Card[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String?
+  turma       Turma         @relation(fields: [turmaId], references: [id])
+  turmaId     Int
+  cards       Card[]
+  sessions    DeckSession[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 /// Carta de um deck de flashcards
 model Card {
-  id             Int            @id @default(autoincrement())
-  front          String
-  back           String
-  imageUrl       String?
-  deck           Deck           @relation(fields: [deckId], references: [id])
-  deckId         Int
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id        Int      @id @default(autoincrement())
+  front     String
+  back      String
+  imageUrl  String?
+  deck      Deck     @relation(fields: [deckId], references: [id])
+  deckId    Int
+  reviews   Review[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Sessão de estudo de um aluno em um deck específico
+model DeckSession {
+  id        Int      @id @default(autoincrement())
+  student   User     @relation(fields: [studentId], references: [id])
+  studentId String
+  deck      Deck     @relation(fields: [deckId], references: [id])
+  deckId    Int
+  createdAt DateTime @default(now())
+  reviews   Review[]
+
+  @@unique([studentId, deckId, createdAt])
+}
+
+/// Registro de revisão de cada carta dentro de uma sessão de estudo
+model Review {
+  id        Int          @id @default(autoincrement())
+  session   DeckSession  @relation(fields: [sessionId], references: [id])
+  sessionId Int
+  card      Card         @relation(fields: [cardId], references: [id])
+  cardId    Int
+  result    ReviewResult
+  createdAt DateTime     @default(now())
+
+  @@unique([sessionId, cardId])
 }

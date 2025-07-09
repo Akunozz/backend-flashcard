@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Param, Body, Patch, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Param,
+  Body,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { DecksService } from './decks.service';
 
 @Controller('decks')
@@ -6,7 +14,9 @@ export class DecksController {
   constructor(private decksService: DecksService) {}
 
   @Post()
-  create(@Body() body: { title: string; description?: string; turmaId: number }) {
+  create(
+    @Body() body: { title: string; description?: string; turmaId: number },
+  ) {
     return this.decksService.createDeck(body);
   }
 
@@ -21,12 +31,20 @@ export class DecksController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: { title?: string; description?: string }) {
+  update(
+    @Param('id') id: string,
+    @Body() body: { title?: string; description?: string },
+  ) {
     return this.decksService.updateDeck(Number(id), body);
   }
 
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.decksService.deleteDeck(Number(id));
+  }
+
+  @Get('turma/:turmaId')
+  findByTurmaId(@Param('turmaId') turmaId: string) {
+    return this.decksService.findByTurmaId(Number(turmaId));
   }
 }
