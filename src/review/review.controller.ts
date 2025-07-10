@@ -14,4 +14,9 @@ export class ReviewController {
   findById(@Param('id') id: string) {
     return this.reviewService.findById(Number(id));
   }
+
+  @Get('turmas/:turmaId')
+  getReviewStatsByTurmaId(@Param('turmaId') turmaId: string) {
+    return this.reviewService.getReviewStatsByTurmaId(Number(turmaId));
+  }
 }
