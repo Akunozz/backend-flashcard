@@ -24,6 +24,8 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
       user: {
         role: user.user.role,
+        id: user.user.id,
+        name: user.user.name,
       },
       messagem: 'Login realizado com sucesso',
     };
