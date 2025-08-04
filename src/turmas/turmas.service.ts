@@ -44,6 +44,13 @@ export class TurmasService {
     });
   }
 
+  async findByProfessor(professorId: string) {
+    return this.prisma.turma.findMany({
+      where: { professorId },
+      include: { professor: true, turmaAluno: true },
+    });
+  }
+
   async findById(id: number) {
     return this.prisma.turma.findUnique({
       where: { id },
@@ -53,5 +60,9 @@ export class TurmasService {
 
   async addAluno(turmaId: number, studentId: string) {
     return this.prisma.turmaAluno.create({ data: { turmaId, studentId } });
+  }
+
+  async deleteTurma(id: number) {
+    return this.prisma.turma.delete({ where: { id } });
   }
 }

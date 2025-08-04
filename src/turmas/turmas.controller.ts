@@ -1,5 +1,5 @@
 
-import { Controller, Post, Get, Param, Body } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Delete } from '@nestjs/common';
 import { TurmasService } from './turmas.service';
 
 @Controller('turmas')
@@ -16,6 +16,11 @@ export class TurmasController {
     return this.turmasService.findAll();
   }
 
+  @Get('professor/:professorId')
+  findByProfessor(@Param('professorId') professorId: string) {
+    return this.turmasService.findByProfessor(professorId);
+  }
+
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.turmasService.findById(Number(id));
@@ -24,5 +29,10 @@ export class TurmasController {
   @Post(':id/alunos')
   addAluno(@Param('id') id: string, @Body() body: { studentId: string }) {
     return this.turmasService.addAluno(Number(id), body.studentId);
+  }
+
+  @Delete(':id')
+  deleteTurma(@Param('id') id: string) {
+    return this.turmasService.deleteTurma(Number(id));
   }
 }
