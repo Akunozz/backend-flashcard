@@ -58,6 +58,13 @@ export class TurmasService {
     });
   }
 
+  async findByStudent(studentId: string) {
+    return this.prisma.turmaAluno.findMany({
+      where: { studentId },
+      include: { turma: true },
+    });
+  }
+
   async addAluno(studentId: string, token: string) {
     // Busca a turma pelo token
     const turma = await this.prisma.turma.findUnique({

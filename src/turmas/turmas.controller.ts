@@ -21,6 +21,11 @@ export class TurmasController {
     return this.turmasService.findByProfessor(professorId);
   }
 
+  @Get('student/:studentId')
+  findByStudent(@Param('studentId') studentId: string) {
+    return this.turmasService.findByStudent(studentId);
+  }
+
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.turmasService.findById(Number(id));
