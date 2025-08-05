@@ -41,7 +41,7 @@ model Turma {
   id          Int          @id @default(autoincrement())
   title       String
   description String?
-  token       String       @unique
+  token       Int       @unique
   professor   User         @relation("ProfessorTurmas", fields: [professorId], references: [id])
   professorId String
   turmaAluno  TurmaAluno[]
