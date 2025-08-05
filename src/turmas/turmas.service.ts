@@ -58,8 +58,34 @@ export class TurmasService {
     });
   }
 
-  async addAluno(turmaId: number, studentId: string) {
-    return this.prisma.turmaAluno.create({ data: { turmaId, studentId } });
+  async addAluno(studentId: string, token: string) {
+    // Busca a turma pelo token
+    const turma = await this.prisma.turma.findUnique({
+      where: { token }
+    });
+    
+    if (!turma) {
+      throw new Error('Turma não encontrada com este token');
+    }
+    
+    // Verifica se o aluno já está na turma
+    const existingAluno = await this.prisma.turmaAluno.findFirst({
+      where: { turmaId: turma.id, studentId }
+    });
+    
+    if (existingAluno) {
+      throw new Error('Aluno já está inscrito nesta turma');
+    }
+    
+    // Adiciona o aluno à turma
+    const turmaAluno = await this.prisma.turmaAluno.create({ 
+      data: { turmaId: turma.id, studentId } 
+    });
+    
+    return {
+      message: 'Adicionado à turma com sucesso',
+      turmaAluno
+    };
   }
 
   async deleteTurma(id: number) {

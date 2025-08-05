@@ -26,9 +26,9 @@ export class TurmasController {
     return this.turmasService.findById(Number(id));
   }
 
-  @Post(':id/alunos')
-  addAluno(@Param('id') id: string, @Body() body: { studentId: string }) {
-    return this.turmasService.addAluno(Number(id), body.studentId);
+  @Post('aluno')
+  addAluno(@Body() body: { studentId: string; token: string }) {
+    return this.turmasService.addAluno(body.studentId, body.token);
   }
 
   @Delete(':id')
