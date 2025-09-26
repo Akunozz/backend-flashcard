@@ -45,10 +45,15 @@ export class TurmasService {
   }
 
   async findByProfessor(professorId: string) {
-    return this.prisma.turma.findMany({
+    const turmas = await this.prisma.turma.findMany({
       where: { professorId },
-      include: { professor: true, turmaAluno: true },
+      include: { professor: true, turmaAluno: true, decks: true },
     });
+    return turmas.map(turma => ({
+      ...turma,
+      alunosCount: turma.turmaAluno ? turma.turmaAluno.length : 0,
+      decksCount: turma.decks ? turma.decks.length : 0,
+    }));
   }
 
   async findById(id: number) {

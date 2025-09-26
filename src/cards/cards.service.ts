@@ -1,9 +1,17 @@
+
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CardsService {
   constructor(private prisma: PrismaService) {}
+
+  async findByDeckId(deckId: number) {
+    return this.prisma.card.findMany({
+      where: { deckId },
+      include: { deck: true },
+    });
+  }
 
   async createCard(data: { front: string; back: string; deckId: number; imageUrl?: string }) {
     const cards = await this.prisma.card.create({
