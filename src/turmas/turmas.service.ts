@@ -34,7 +34,7 @@ export class TurmasService {
     return {
       message: 'Turma criada com sucesso',
       token: turma.token,
-      turma
+      turma,
     };
   }
 
@@ -49,7 +49,7 @@ export class TurmasService {
       where: { professorId },
       include: { professor: true, turmaAluno: true, decks: true },
     });
-    return turmas.map(turma => ({
+    return turmas.map((turma) => ({
       ...turma,
       alunosCount: turma.turmaAluno ? turma.turmaAluno.length : 0,
       decksCount: turma.decks ? turma.decks.length : 0,
@@ -66,37 +66,41 @@ export class TurmasService {
   async findByStudent(studentId: string) {
     return this.prisma.turmaAluno.findMany({
       where: { studentId },
-      include: { turma: true },
+      include: {
+        turma: {
+          include: { professor: true },
+        },
+      },
     });
   }
 
   async addAluno(studentId: string, token: string) {
     // Busca a turma pelo token
     const turma = await this.prisma.turma.findUnique({
-      where: { token }
+      where: { token },
     });
-    
+
     if (!turma) {
       throw new Error('Turma não encontrada com este token');
     }
-    
+
     // Verifica se o aluno já está na turma
     const existingAluno = await this.prisma.turmaAluno.findFirst({
-      where: { turmaId: turma.id, studentId }
+      where: { turmaId: turma.id, studentId },
     });
-    
+
     if (existingAluno) {
       throw new Error('Aluno já está inscrito nesta turma');
     }
-    
+
     // Adiciona o aluno à turma
-    const turmaAluno = await this.prisma.turmaAluno.create({ 
-      data: { turmaId: turma.id, studentId } 
+    const turmaAluno = await this.prisma.turmaAluno.create({
+      data: { turmaId: turma.id, studentId },
     });
-    
+
     return {
       message: 'Adicionado à turma com sucesso',
-      turmaAluno
+      turmaAluno,
     };
   }
 
