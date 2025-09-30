@@ -68,7 +68,15 @@ export class TurmasService {
       where: { studentId },
       include: {
         turma: {
-          include: { professor: true },
+          include: {
+            professor: true,
+            _count: {
+              select: {
+                turmaAluno: true, // nome da relação entre turma e alunos
+                decks: true, // nome da relação entre turma e decks
+              },
+            },
+          },
         },
       },
     });
