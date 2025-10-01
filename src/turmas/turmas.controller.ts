@@ -1,3 +1,4 @@
+import { Patch } from '@nestjs/common';
 
 import { Controller, Post, Get, Param, Body, Delete } from '@nestjs/common';
 import { TurmasService } from './turmas.service';
@@ -5,7 +6,12 @@ import { TurmasService } from './turmas.service';
 @Controller('turmas')
 export class TurmasController {
   constructor(private turmasService: TurmasService) {}
-
+  
+  @Patch(':id')
+  updateTurma(@Param('id') id: string, @Body() body: { title?: string; description?: string }) {
+    return this.turmasService.updateTurma(Number(id), body);
+  }
+  
   @Post()
   create(@Body() body: { title: string; description?: string; token: string; professorId: string }) {
     return this.turmasService.createTurma(body);

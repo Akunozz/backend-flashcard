@@ -67,7 +67,7 @@ model Deck {
   id          Int           @id @default(autoincrement())
   title       String
   description String?
-  turma       Turma         @relation(fields: [turmaId], references: [id])
+  turma       Turma         @relation(fields: [turmaId], references: [id], onDelete: Cascade)
   turmaId     Int
   cards       Card[]
   sessions    DeckSession[]
@@ -81,7 +81,7 @@ model Card {
   front     String
   back      String
   imageUrl  String?
-  deck      Deck     @relation(fields: [deckId], references: [id])
+  deck      Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
   deckId    Int
   reviews   Review[]
   createdAt DateTime @default(now())
@@ -93,7 +93,7 @@ model DeckSession {
   id        Int      @id @default(autoincrement())
   student   User     @relation(fields: [studentId], references: [id])
   studentId String
-  deck      Deck     @relation(fields: [deckId], references: [id])
+  deck      Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
   deckId    Int
   createdAt DateTime @default(now())
   reviews   Review[]
@@ -106,7 +106,7 @@ model Review {
   id        Int          @id @default(autoincrement())
   session   DeckSession  @relation(fields: [sessionId], references: [id])
   sessionId Int
-  card      Card         @relation(fields: [cardId], references: [id])
+  card      Card         @relation(fields: [cardId], references: [id], onDelete: Cascade)
   cardId    Int
   result    ReviewResult
   createdAt DateTime     @default(now())

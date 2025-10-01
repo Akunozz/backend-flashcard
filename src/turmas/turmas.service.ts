@@ -47,12 +47,26 @@ export class TurmasService {
   async findByProfessor(professorId: string) {
     const turmas = await this.prisma.turma.findMany({
       where: { professorId },
-      include: { professor: true, turmaAluno: true, decks: true },
+      include: {
+        professor: true,
+        decks: true,
+        turmaAluno: {
+          include: {
+            student: {
+              select: { name: true },
+            },
+          },
+        },
+      },
     });
     return turmas.map((turma) => ({
       ...turma,
       alunosCount: turma.turmaAluno ? turma.turmaAluno.length : 0,
       decksCount: turma.decks ? turma.decks.length : 0,
+      turmaAluno: turma.turmaAluno.map((aluno) => ({
+        ...aluno,
+        studentNome: aluno.student?.name || null,
+      })),
     }));
   }
 
@@ -72,8 +86,8 @@ export class TurmasService {
             professor: true,
             _count: {
               select: {
-                turmaAluno: true, // nome da relação entre turma e alunos
-                decks: true, // nome da relação entre turma e decks
+                turmaAluno: true,
+                decks: true,
               },
             },
           },
@@ -114,5 +128,15 @@ export class TurmasService {
 
   async deleteTurma(id: number) {
     return this.prisma.turma.delete({ where: { id } });
+  }
+
+  async updateTurma(
+    id: number,
+    data: { title?: string; description?: string },
+  ) {
+    return this.prisma.turma.update({
+      where: { id },
+      data,
+    });
   }
 }
