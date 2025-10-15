@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 async function generateUniqueToken(
@@ -97,14 +97,16 @@ export class TurmasService {
   }
 
   async addAluno(studentId: string, token: string) {
-    // Busca a turma pelo token
     const turma = await this.prisma.turma.findUnique({
       where: { token },
     });
 
-    if (!turma) {
-      throw new Error('Turma não encontrada com este token');
-    }
+  if (!turma) {
+    throw new HttpException(
+      'Turma não encontrada com este token',
+      HttpStatus.NOT_FOUND,
+    );
+  }
 
     // Verifica se o aluno já está na turma
     const existingAluno = await this.prisma.turmaAluno.findFirst({
@@ -112,7 +114,10 @@ export class TurmasService {
     });
 
     if (existingAluno) {
-      throw new Error('Aluno já está inscrito nesta turma');
+      throw new HttpException(
+        'Aluno já está inscrito nesta turma',
+        HttpStatus.CONFLICT,
+      );
     }
 
     // Adiciona o aluno à turma

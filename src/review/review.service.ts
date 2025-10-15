@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class ReviewService {
   constructor(private prisma: PrismaService) {}
-  
+
   async findAll() {
     return this.prisma.review.findMany({
       include: { session: true, card: true },
@@ -17,14 +17,43 @@ export class ReviewService {
       include: { session: true, card: true },
     });
   }
-  
+
+  async getReviewByDeckId(deckId: number) {
+    // Busca todos os cards do deck
+    const cards = await this.prisma.card.findMany({
+      where: { deckId },
+      select: { id: true },
+    });
+    const cardIds = cards.map((c) => c.id);
+    // Busca todos os reviews desses cards
+    const reviews = await this.prisma.review.findMany({
+      where: { cardId: { in: cardIds } },
+      include: { session: true, card: true },
+    });
+    // Agrupa por cardId e conta CORRECT/INCORRECT
+    const stats: Record<number, { correct: number; incorrect: number }> = {};
+    for (const card of cardIds) {
+      stats[card] = { correct: 0, incorrect: 0 };
+    }
+    for (const review of reviews) {
+      if (review.result === 'CORRECT') stats[review.cardId].correct++;
+      if (review.result === 'INCORRECT') stats[review.cardId].incorrect++;
+    }
+    // Retorna array de objetos { cardId, correct, incorrect }
+    return Object.entries(stats).map(([cardId, { correct, incorrect }]) => ({
+      cardId: Number(cardId),
+      correct,
+      incorrect,
+    }));
+  }
+
   async getReviewStatsByTurmaId(turmaId: number) {
     // Busca todos os cards da turma
     const cards = await this.prisma.card.findMany({
       where: { deck: { turmaId } },
       select: { id: true },
     });
-    const cardIds = cards.map(c => c.id);
+    const cardIds = cards.map((c) => c.id);
     // Busca todos os reviews desses cards
     const reviews = await this.prisma.review.findMany({
       where: { cardId: { in: cardIds } },
