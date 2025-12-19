@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 async function generateUniqueToken(
@@ -34,7 +34,7 @@ export class TurmasService {
     return {
       message: 'Turma criada com sucesso',
       token: turma.token,
-      turma
+      turma,
     };
   }
 
@@ -45,10 +45,29 @@ export class TurmasService {
   }
 
   async findByProfessor(professorId: string) {
-    return this.prisma.turma.findMany({
+    const turmas = await this.prisma.turma.findMany({
       where: { professorId },
-      include: { professor: true, turmaAluno: true },
+      include: {
+        professor: true,
+        decks: true,
+        turmaAluno: {
+          include: {
+            student: {
+              select: { name: true },
+            },
+          },
+        },
+      },
     });
+    return turmas.map((turma) => ({
+      ...turma,
+      alunosCount: turma.turmaAluno ? turma.turmaAluno.length : 0,
+      decksCount: turma.decks ? turma.decks.length : 0,
+      turmaAluno: turma.turmaAluno.map((aluno) => ({
+        ...aluno,
+        studentNome: aluno.student?.name || null,
+      })),
+    }));
   }
 
   async findById(id: number) {
@@ -61,41 +80,68 @@ export class TurmasService {
   async findByStudent(studentId: string) {
     return this.prisma.turmaAluno.findMany({
       where: { studentId },
-      include: { turma: true },
+      include: {
+        turma: {
+          include: {
+            professor: true,
+            _count: {
+              select: {
+                turmaAluno: true,
+                decks: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 
   async addAluno(studentId: string, token: string) {
-    // Busca a turma pelo token
     const turma = await this.prisma.turma.findUnique({
-      where: { token }
+      where: { token },
     });
-    
-    if (!turma) {
-      throw new Error('Turma não encontrada com este token');
-    }
-    
+
+  if (!turma) {
+    throw new HttpException(
+      'Turma não encontrada com este token',
+      HttpStatus.NOT_FOUND,
+    );
+  }
+
     // Verifica se o aluno já está na turma
     const existingAluno = await this.prisma.turmaAluno.findFirst({
-      where: { turmaId: turma.id, studentId }
+      where: { turmaId: turma.id, studentId },
     });
-    
+
     if (existingAluno) {
-      throw new Error('Aluno já está inscrito nesta turma');
+      throw new HttpException(
+        'Aluno já está inscrito nesta turma',
+        HttpStatus.CONFLICT,
+      );
     }
-    
+
     // Adiciona o aluno à turma
-    const turmaAluno = await this.prisma.turmaAluno.create({ 
-      data: { turmaId: turma.id, studentId } 
+    const turmaAluno = await this.prisma.turmaAluno.create({
+      data: { turmaId: turma.id, studentId },
     });
-    
+
     return {
       message: 'Adicionado à turma com sucesso',
-      turmaAluno
+      turmaAluno,
     };
   }
 
   async deleteTurma(id: number) {
     return this.prisma.turma.delete({ where: { id } });
+  }
+
+  async updateTurma(
+    id: number,
+    data: { title?: string; description?: string },
+  ) {
+    return this.prisma.turma.update({
+      where: { id },
+      data,
+    });
   }
 }

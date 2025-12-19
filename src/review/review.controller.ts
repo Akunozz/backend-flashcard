@@ -19,4 +19,9 @@ export class ReviewController {
   getReviewStatsByTurmaId(@Param('turmaId') turmaId: string) {
     return this.reviewService.getReviewStatsByTurmaId(Number(turmaId));
   }
+
+  @Get('decks/:deckId')
+  getReviewByDeckId(@Param('deckId') deckId: string) {
+    return this.reviewService.getReviewByDeckId(Number(deckId));
+  }
 }

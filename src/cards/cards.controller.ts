@@ -15,6 +15,11 @@ export class CardsController {
     return this.cardsService.findAll();
   }
 
+  @Get('deck/:deckId')
+  findByDeckId(@Param('deckId') deckId: string) {
+    return this.cardsService.findByDeckId(Number(deckId));
+  }
+
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.cardsService.findById(Number(id));
